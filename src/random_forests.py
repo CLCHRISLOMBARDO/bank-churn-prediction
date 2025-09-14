@@ -8,11 +8,11 @@ from optuna.study import Study
 from time import time
 
 import pickle
+import json
 
-
-output_path = '../outputs/random_forest/'
+output_path = 'src/outputs/random_forest/'
 db_path = output_path + 'db/'
-model_path = output_path+'model'
+model_path = output_path+'model/'
 
 ganancia_acierto = 780000
 costo_estimulo = 20000
@@ -57,6 +57,7 @@ def optim_hiperp(X:pd.DataFrame|np.ndarray ,y:pd.Series|np.ndarray , n_trials:in
         model.fit(Xi, y)
 
         return _ganancia_prob(model.oob_decision_function_, y)
+    print("llegamos aca")
 
     storage_name = "sqlite:///" + db_path + "optimization_tree.db"
     study_name = "exp_206_random-forest-opt"
@@ -68,13 +69,20 @@ def optim_hiperp(X:pd.DataFrame|np.ndarray ,y:pd.Series|np.ndarray , n_trials:in
         load_if_exists=True,
     )
 
-    study.optimize(objective, n_trials=25)
+    study.optimize(objective, n_trials=n_trials)
+    import json
+
+    best_params = study.best_trial.params
+
+    with open(model_path+"best_params.json", "w") as f:
+        json.dump(best_params, f, indent=4) 
+
     return study
 
 def entrenamiento_rf(X:pd.DataFrame|np.ndarray ,y:pd.Series|np.ndarray , best_parameters = dict[str, object])->RandomForestClassifier:
     Xi=_imputacion(X)
     model_rf = RandomForestClassifier(
-        n_estimators=100,
+        n_estimators=1000,
         #**study.best_params,
         **best_parameters,
         max_samples=0.7,
