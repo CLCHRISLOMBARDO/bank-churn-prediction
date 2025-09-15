@@ -1,0 +1,6 @@
+{
+    "max_depth": 31,
+    "min_samples_split": 111,
+    "min_samples_leaf": 4,
+    "max_features": 0.6572995717473027
+}

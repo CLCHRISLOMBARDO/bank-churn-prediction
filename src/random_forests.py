@@ -6,6 +6,7 @@ from joblib import Parallel, delayed
 import optuna
 from optuna.study import Study
 from time import time
+import datetime
 
 import pickle
 import json
@@ -34,6 +35,7 @@ def _ganancia_prob(y_hat:pd.Series|np.ndarray , y:pd.Series|np.ndarray ,prop=1,c
 
 
 def optim_hiperp(X:pd.DataFrame|np.ndarray ,y:pd.Series|np.ndarray , n_trials:int)-> Study:
+    fecha = datetime.datetime.now().strftime("%Y-%m-%d %H_%M_%S")
     Xi=_imputacion(X)
 
     def objective(trial):
@@ -70,16 +72,18 @@ def optim_hiperp(X:pd.DataFrame|np.ndarray ,y:pd.Series|np.ndarray , n_trials:in
     )
 
     study.optimize(objective, n_trials=n_trials)
-    import json
 
     best_params = study.best_trial.params
+    
 
-    with open(model_path+"best_params.json", "w") as f:
+    with open(model_path+f"best_params_{fecha}.json", "w") as f:
         json.dump(best_params, f, indent=4) 
 
     return study
 
 def entrenamiento_rf(X:pd.DataFrame|np.ndarray ,y:pd.Series|np.ndarray , best_parameters = dict[str, object])->RandomForestClassifier:
+    
+    fecha = datetime.datetime.now().strftime("%Y-%m-%d %H_%M_%S")
     Xi=_imputacion(X)
     model_rf = RandomForestClassifier(
         n_estimators=1000,
@@ -90,7 +94,7 @@ def entrenamiento_rf(X:pd.DataFrame|np.ndarray ,y:pd.Series|np.ndarray , best_pa
         n_jobs=12,
         oob_score=True )
     model_rf.fit(Xi,y)
-    filename=model_path+'exp_206_random_forest_model_100.sav'
+    filename=model_path+f'rf_model_{fecha}.sav'
     pickle.dump(model_rf, open(filename, 'wb'))
     return model_rf
     
