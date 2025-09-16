@@ -73,3 +73,21 @@ def feature_engineering_delta(df:pd.DataFrame , columnas:list[str],cant_lag:int=
     con.close()
     print("ejecucion delta finalizada")
     return df
+
+
+
+# def feature_engineering_ratio(df:pd.DataFrame|pd.Series, columnas:list[str] )->pd.DataFrame:
+    
+#     sql="SELECT *"
+#     for c in columnas:
+
+
+
+#     sql+=" FROM df"
+
+#     query=
+#     """"SELECT *
+#         ,monto/cantidad as monto_cantidad
+#         ,monto
+
+#         FROM df    """
