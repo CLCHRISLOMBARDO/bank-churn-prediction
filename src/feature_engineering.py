@@ -76,18 +76,20 @@ def feature_engineering_delta(df:pd.DataFrame , columnas:list[str],cant_lag:int=
 
 
 
-# def feature_engineering_ratio(df:pd.DataFrame|pd.Series, columnas:list[str] )->pd.DataFrame:
-    
-#     sql="SELECT *"
-#     for c in columnas:
+def feature_engineering_ratio(df:pd.DataFrame|pd.Series, columnas:list[list[str]] )->pd.DataFrame:
+    sql="SELECT *"
+    for par in columnas:
+        if par[0] in df.columns and par[1] in df.columns:
+            sql+=f", {par[0]}/{par[1]} as ratio_{par[0]}_{par[1]}"
+        else:
+            print(f"no se encontro el par de atributos {par}")
 
+    sql+=" FROM df"
 
+    con = duckdb.connect(database=":memory:")
+    con.register("df", df)
+    df=con.execute(sql).df()
+    con.close()
+    print("ejecucion delta finalizada")
+    return df
 
-#     sql+=" FROM df"
-
-#     query=
-#     """"SELECT *
-#         ,monto/cantidad as monto_cantidad
-#         ,monto
-
-#         FROM df    """
