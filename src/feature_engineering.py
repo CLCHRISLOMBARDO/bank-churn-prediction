@@ -1,6 +1,9 @@
 import pandas as pd
 import numpy
 import duckdb
+import logging
+
+logger = logging.getLogger(__name__)
 
 def feature_engineering_lag(df:pd.DataFrame , columnas:list[str],cant_lag:int=1 ) -> pd.DataFrame:
     """
@@ -20,6 +23,8 @@ def feature_engineering_lag(df:pd.DataFrame , columnas:list[str],cant_lag:int=1 
     pd.DataFrame
         DataFrame con las variables de lag agregadas
     """
+    logger.info("Feature de lag")
+
     # Armado de la consulta SQL
     sql="SELECT *"
     for attr in columnas:
@@ -35,12 +40,13 @@ def feature_engineering_lag(df:pd.DataFrame , columnas:list[str],cant_lag:int=1 
     con.register("df", df)
     df=con.execute(sql).df()
     con.close()
-    print("ejecucion lag finalizada")
+
+    logger.info("ejecucion lag finalizada")
     return df
 
 def feature_engineering_delta(df:pd.DataFrame , columnas:list[str],cant_lag:int=1 ) -> pd.DataFrame:
     """
-    Genera variables de lag para los atributos especificados utilizando SQL.
+    Genera variables de delta para los atributos especificados utilizando SQL.
   
     Parameters:
     -----------
@@ -49,7 +55,7 @@ def feature_engineering_delta(df:pd.DataFrame , columnas:list[str],cant_lag:int=
     columnas : list
         Lista de atributos para los cuales generar lags. Si es None, no se generan lags.
     cant_lag : int, default=1
-        Cantidad de lags a generar para cada atributo
+        Cantidad de delta a generar para cada atributo
   
     Returns:
     --------
@@ -57,6 +63,7 @@ def feature_engineering_delta(df:pd.DataFrame , columnas:list[str],cant_lag:int=
         DataFrame con las variables de lag agregadas
     """
     # Armado de la consulta SQL
+    logger.info("feature de delta")
     sql="SELECT *"
     for attr in columnas:
         if attr in df.columns:
@@ -71,12 +78,29 @@ def feature_engineering_delta(df:pd.DataFrame , columnas:list[str],cant_lag:int=
     con.register("df", df)
     df=con.execute(sql).df()
     con.close()
-    print("ejecucion delta finalizada")
+    logger.info("ejecucion delta finalizada")
     return df
 
 
 
 def feature_engineering_ratio(df:pd.DataFrame|pd.Series, columnas:list[list[str]] )->pd.DataFrame:
+    """
+    Genera variables de ratio para los atributos especificados utilizando SQL.
+  
+    Parameters:
+    -----------
+    df : pd.DataFrame
+        DataFrame con los datos
+    columnas : list[list]
+        Lista de pares de columnas de monto y cantidad relacionados para generar ratios. Si es None, no se generan lags.
+    cant_lag : int, default=1
+        Cantidad de delta a generar para cada atributo
+  
+    Returns:
+    --------
+    pd.DataFrame
+        DataFrame con las variables de ratios agregadas"""
+    
     sql="SELECT *"
     for par in columnas:
         if par[0] in df.columns and par[1] in df.columns:
@@ -90,6 +114,6 @@ def feature_engineering_ratio(df:pd.DataFrame|pd.Series, columnas:list[list[str]
     con.register("df", df)
     df=con.execute(sql).df()
     con.close()
-    print("ejecucion delta finalizada")
+    logger.info("ejecucion delta finalizada")
     return df
 

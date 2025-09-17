@@ -1,7 +1,7 @@
 import pandas as pd
 import logging
 
-logger = logging.getLogger("__name__")
+logger = logging.getLogger(__name__)
 def cargar_datos(path:str)->pd.DataFrame|None:
     '''
     carga un dataset desde 'path' y devuelve un pandas.Dataframe.
