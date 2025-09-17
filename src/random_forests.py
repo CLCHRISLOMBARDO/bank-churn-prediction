@@ -11,7 +11,7 @@ import datetime
 import pickle
 import json
 
-output_path = 'src/outputs/random_forest/'
+output_path = 'outputs/random_forest/'
 db_path = output_path + 'db/'
 model_path = output_path+'model/'
 
