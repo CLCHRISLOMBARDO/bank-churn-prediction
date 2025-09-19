@@ -93,7 +93,7 @@ def main():
     X_train_imp = imputacion(X_train)
     # submuestreo
     X_train_imp,y_train = submuestreo(X_train_imp,y_train, n_completo)
-    
+
     X_train_sample_imp ,y_train_sample = submuestreo(X_train_imp,y_train, n_subsample)
     
 
@@ -111,9 +111,9 @@ def main():
     name_rf_completo=f"_completo_{fecha}"
     study_rf_completo = optim_hiperp_binaria(X_train_imp , y_train , n_trials , name=name_rf_completo) 
     best_params_completo=study_rf_completo.best_params
-    model_rf_completo=entrenamiento_rf(X_train_imp , y_train ,best_params_completo,name=name_rf_sample)
+    model_rf_completo=entrenamiento_rf(X_train_imp , y_train ,best_params_completo,name=name_rf_completo)
     class_index=np.where(model_rf_completo.classes_==1)[0]
-    proba_baja_completo=model_rf_sample.predict_proba(X_train_sample_imp)[:,class_index] #Predigo solo el subsampleo que es el que voy a graficar
+    proba_baja_completo=model_rf_completo.predict_proba(X_train_sample_imp)[:,class_index] #Predigo solo el subsampleo que es el que voy a graficar
     distancia_con_completo_sampleado=distanceMatrix(model_rf_completo,X_train_sample_imp) # Calculo la dist solo con el subsampleo
 
     # 4. Embedding - UMAP
