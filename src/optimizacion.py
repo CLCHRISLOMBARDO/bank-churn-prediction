@@ -1,3 +1,4 @@
+#optimizacion.py
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
@@ -12,18 +13,21 @@ import datetime
 
 import pickle
 import json
+import logging
 
-output_path = 'outputs/random_forest/'
+from src.config import *
+
+output_path = PATH_OUTPUT_OPTIMIZACION
 db_path = output_path + 'db/'
-model_path = output_path+'model/'
+bestparms_path = output_path+'best_params/'
 
-ganancia_acierto = 780000
-costo_estimulo = 20000
+ganancia_acierto = GANANCIA
+costo_estimulo = ESTIMULO
 
-
-
+logger = logging.getLogger(__name__)
 
 def optim_hiperp_binaria(X:pd.DataFrame|np.ndarray ,y:pd.Series|np.ndarray , n_trials:int)-> Study:
+    logger.info("Comienzo optimizacion hiperp binario")
     fecha = datetime.datetime.now().strftime("%Y-%m-%d %H_%M_%S")
 
     def objective(trial):
@@ -50,10 +54,9 @@ def optim_hiperp_binaria(X:pd.DataFrame|np.ndarray ,y:pd.Series|np.ndarray , n_t
         auc_score = roc_auc_score(y, proba_oob[:, 1])
 
         return auc_score
-    print("llegamos aca")
-
+    
     storage_name = "sqlite:///" + db_path + "optimization_tree.db"
-    study_name = "exp_206_random-forest-opt"
+    study_name   = f"rf_binario_auc_{fecha}"   
 
     study = optuna.create_study(
         direction="maximize",
@@ -66,24 +69,31 @@ def optim_hiperp_binaria(X:pd.DataFrame|np.ndarray ,y:pd.Series|np.ndarray , n_t
 
     best_params = study.best_trial.params
     
+    # Mejor guardarlo en el main ?
+    try:
 
-    with open(model_path+f"best_params_{fecha}.json", "w") as f:
-        json.dump(best_params, f, indent=4) 
-
+        with open(bestparms_path+f"best_params_{fecha}.json", "w") as f:
+            json.dump(best_params, f, indent=4) 
+        
+        logger.info("Finalizacion de optimizacion hiperp binario. Best parameters guardado en json")
+    except Exception as e:
+        logger.error(f"Error al tratar de guardar el json de los best parameters por el error :{e}")
     return study
 
 
 
 def _ganancia_prob(y_hat:pd.Series|np.ndarray , y:pd.Series|np.ndarray ,prop=1,class_index:int =1,threshold:int=0.025)->float:
+    logger.info("comienzo funcion ganancia con threhold = 0.025")
     @np.vectorize
     def _ganancia_row(predicted , actual , threshold=0.025):
         return (predicted>=threshold) * (ganancia_acierto if actual=="BAJA+2" else -costo_estimulo)
+    logger.info("Finalizacion funcion ganancia con threhold = 0.025")
     return _ganancia_row(y_hat[:,class_index] ,y).sum() /prop
 
 
 def optim_hiperp_ternaria(X:pd.DataFrame|np.ndarray ,y:pd.Series|np.ndarray , n_trials:int)-> Study:
     fecha = datetime.datetime.now().strftime("%Y-%m-%d %H_%M_%S")
-
+    logger.info("Inicio de optimizacion hiperp ternario")
     def objective(trial):
         max_depth = trial.suggest_int('max_depth', 2, 32)
         min_samples_split = trial.suggest_int('min_samples_split', 2, 2000)
@@ -105,10 +115,9 @@ def optim_hiperp_ternaria(X:pd.DataFrame|np.ndarray ,y:pd.Series|np.ndarray , n_
         model.fit(X, y)
 
         return _ganancia_prob(model.oob_decision_function_, y)
-    print("llegamos aca")
 
     storage_name = "sqlite:///" + db_path + "optimization_tree.db"
-    study_name = "exp_206_random-forest-opt"
+    study_name = f"rf_ternario_ganancia_{fecha}"  
 
     study = optuna.create_study(
         direction="maximize",
@@ -121,26 +130,15 @@ def optim_hiperp_ternaria(X:pd.DataFrame|np.ndarray ,y:pd.Series|np.ndarray , n_
 
     best_params = study.best_trial.params
     
+    try:
+        with open(bestparms_path+f"best_params_{fecha}.json", "w") as f:
+            json.dump(best_params, f, indent=4) 
+        logger.info("Finalizacion de optimizacion hiperp ternario. Best parameters guardado en json")
+    except Exception as e:
+        logger.error(f"Error al tratar de guardar el json de los best parameters por el error :{e}")
 
-    with open(model_path+f"best_params_{fecha}.json", "w") as f:
-        json.dump(best_params, f, indent=4) 
 
+    
     return study
 
-def entrenamiento_rf(X:pd.DataFrame|np.ndarray ,y:pd.Series|np.ndarray , best_parameters = dict[str, object])->RandomForestClassifier:
-    
-    fecha = datetime.datetime.now().strftime("%Y-%m-%d %H_%M_%S")
-    Xi=_imputacion(X)
-    model_rf = RandomForestClassifier(
-        n_estimators=1000,
-        #**study.best_params,
-        **best_parameters,
-        max_samples=0.7,
-        random_state=42,
-        n_jobs=12,
-        oob_score=True )
-    model_rf.fit(Xi,y)
-    filename=model_path+f'rf_model_{fecha}.sav'
-    pickle.dump(model_rf, open(filename, 'wb'))
-    return model_rf
-    
+
