@@ -16,6 +16,7 @@ def split_train_binario(df:pd.DataFrame|np.ndarray , mes_train:int) ->Tuple[pd.D
     y_train_ternaria = df["clase_ternaria"].copy()
     y_train=y_train_ternaria.map(lambda x : 0 if x =="Continua" else 1)
     logger.info(f"X_train shape : {X_train.shape} / y_train shape : {y_train.shape}")
+    logger.info(f"cantidad de baja y continua:{np.unique(y_train,return_counts=True)}")
     logger.info("Finalizacion label binario")
     return X_train , y_train
 

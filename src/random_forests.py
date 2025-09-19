@@ -1,8 +1,6 @@
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.impute import SimpleImputer
-from sklearn.metrics import roc_auc_score
 
 import logging
 from time import time
@@ -11,21 +9,22 @@ import datetime
 import pickle
 import json
 
+from src.config import PATH_OUTPUT_RF ,N_ESTIMATORS
+
+output_path = PATH_OUTPUT_RF
+n_estimators = N_ESTIMATORS
+
 logger = logging.getLogger(__name__)
 
-output_path = 'outputs/random_forest/'
 
 
-ganancia_acierto = 780000
-costo_estimulo = 20000
-
-
-
-def entrenamiento_rf(X:pd.DataFrame|np.ndarray ,y:pd.Series|np.ndarray , best_parameters = dict[str, object])->RandomForestClassifier:
-    
+def entrenamiento_rf(X:pd.DataFrame|np.ndarray ,y:pd.Series|np.ndarray , best_parameters:dict[str, object], name:str)->RandomForestClassifier:
     fecha = datetime.datetime.now().strftime("%Y-%m-%d %H_%M_%S")
+    name=f"rf_model_{name}_{fecha}"
+    logger.info(f"Comienzo del entrenamiento del rf : {name}")
+    
     model_rf = RandomForestClassifier(
-        n_estimators=1000,
+        n_estimators=n_estimators,
         #**study.best_params,
         **best_parameters,
         max_samples=0.7,
@@ -33,7 +32,28 @@ def entrenamiento_rf(X:pd.DataFrame|np.ndarray ,y:pd.Series|np.ndarray , best_pa
         n_jobs=12,
         oob_score=True )
     model_rf.fit(X,y)
-    filename=output_path+f'rf_model_{fecha}.sav'
-    pickle.dump(model_rf, open(filename, 'wb'))
+    try:
+        filename=output_path+f'{name}.sav'
+        pickle.dump(model_rf, open(filename, 'wb'))
+        logger.info(f"Modelo {name} guardado en {output_path}")
+        logger.info("Fin del entrenamiento del random forest")
+    except Exception as e:
+        logger.error(f"Error al intentar guardar el modelo {name}, por el error {e}")
+        return
     return model_rf
     
+
+def distanceMatrix(model:RandomForestClassifier, X:pd.DataFrame|np.ndarray)->np.ndarray:
+    logger.info(f"Comienzo del calculo de las distancias")
+    terminals = model.apply(X)
+    nTrees = terminals.shape[1]
+
+    a = terminals[:,0]
+    proxMat = 1*np.equal.outer(a, a)
+
+    for i in range(1, nTrees):
+        a = terminals[:,i]
+        proxMat += 1*np.equal.outer(a, a)
+    proxMat = proxMat / nTrees
+    logger.info(f"Fin del calculo de las distancias")
+    return proxMat.max() - proxMat

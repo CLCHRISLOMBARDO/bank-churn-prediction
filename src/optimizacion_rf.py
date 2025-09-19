@@ -15,7 +15,7 @@ import pickle
 import json
 import logging
 
-from src.config import *
+from src.config import PATH_OUTPUT_OPTIMIZACION, GANANCIA,ESTIMULO
 
 output_path = PATH_OUTPUT_OPTIMIZACION
 db_path = output_path + 'db/'
@@ -26,9 +26,11 @@ costo_estimulo = ESTIMULO
 
 logger = logging.getLogger(__name__)
 
-def optim_hiperp_binaria(X:pd.DataFrame|np.ndarray ,y:pd.Series|np.ndarray , n_trials:int)-> Study:
+def optim_hiperp_binaria(X:pd.DataFrame|np.ndarray ,y:pd.Series|np.ndarray , n_trials:int, name:str)-> Study:
     logger.info("Comienzo optimizacion hiperp binario")
-    fecha = datetime.datetime.now().strftime("%Y-%m-%d %H_%M_%S")
+    fecha = datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S")
+    name +="_binaria"
+    
 
     def objective(trial):
         max_depth = trial.suggest_int('max_depth', 2, 32)
@@ -56,7 +58,7 @@ def optim_hiperp_binaria(X:pd.DataFrame|np.ndarray ,y:pd.Series|np.ndarray , n_t
         return auc_score
     
     storage_name = "sqlite:///" + db_path + "optimization_tree.db"
-    study_name   = f"rf_binario_auc_{fecha}"   
+    study_name = f"rf_"+name+f"_auc_{fecha}"    
 
     study = optuna.create_study(
         direction="maximize",
@@ -72,10 +74,10 @@ def optim_hiperp_binaria(X:pd.DataFrame|np.ndarray ,y:pd.Series|np.ndarray , n_t
     # Mejor guardarlo en el main ?
     try:
 
-        with open(bestparms_path+f"best_params_{fecha}.json", "w") as f:
+        with open(bestparms_path+f"best_params_{name}_auc_{fecha}.json", "w") as f:
             json.dump(best_params, f, indent=4) 
-        
-        logger.info("Finalizacion de optimizacion hiperp binario. Best parameters guardado en json")
+        logger.info(f"best_params_{name}_auc_{fecha}.json guardado en outputs/optimizacion_rf/best_params/")
+        logger.info("Finalizacion de optimizacion hiperp binario.")
     except Exception as e:
         logger.error(f"Error al tratar de guardar el json de los best parameters por el error :{e}")
     return study
@@ -91,9 +93,10 @@ def _ganancia_prob(y_hat:pd.Series|np.ndarray , y:pd.Series|np.ndarray ,prop=1,c
     return _ganancia_row(y_hat[:,class_index] ,y).sum() /prop
 
 
-def optim_hiperp_ternaria(X:pd.DataFrame|np.ndarray ,y:pd.Series|np.ndarray , n_trials:int)-> Study:
-    fecha = datetime.datetime.now().strftime("%Y-%m-%d %H_%M_%S")
+def optim_hiperp_ternaria(X:pd.DataFrame|np.ndarray ,y:pd.Series|np.ndarray , n_trials:int , name:str)-> Study:
+    fecha = datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S")
     logger.info("Inicio de optimizacion hiperp ternario")
+    name +="_ternaria"
     def objective(trial):
         max_depth = trial.suggest_int('max_depth', 2, 32)
         min_samples_split = trial.suggest_int('min_samples_split', 2, 2000)
@@ -117,7 +120,7 @@ def optim_hiperp_ternaria(X:pd.DataFrame|np.ndarray ,y:pd.Series|np.ndarray , n_
         return _ganancia_prob(model.oob_decision_function_, y)
 
     storage_name = "sqlite:///" + db_path + "optimization_tree.db"
-    study_name = f"rf_ternario_ganancia_{fecha}"  
+    study_name = f"rf_"+name+f"_ganancia_{fecha}"  
 
     study = optuna.create_study(
         direction="maximize",
@@ -131,14 +134,12 @@ def optim_hiperp_ternaria(X:pd.DataFrame|np.ndarray ,y:pd.Series|np.ndarray , n_
     best_params = study.best_trial.params
     
     try:
-        with open(bestparms_path+f"best_params_{fecha}.json", "w") as f:
+        with open(bestparms_path+f"best_params{name}_ganancia_{fecha}.json", "w") as f:
             json.dump(best_params, f, indent=4) 
-        logger.info("Finalizacion de optimizacion hiperp ternario. Best parameters guardado en json")
+            logger.info(f"best_params_{name}_ganancia_{fecha}.json guardado en outputs/optimizacion_rf/best_params/")
+        logger.info("Finalizacion de optimizacion hiperp binario.")
     except Exception as e:
         logger.error(f"Error al tratar de guardar el json de los best parameters por el error :{e}")
-
-
-    
     return study
 
 
