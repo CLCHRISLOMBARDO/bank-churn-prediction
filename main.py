@@ -31,6 +31,7 @@ path_output_segmentacion = PATH_OUTPUT_SEGMENTACION
 
 ## Carga de variables
 n_subsample=N_SUBSAMPLE
+n_completo=N_COMPLETO
 mes_train = MES_TRAIN_SEGM
 n_trials=N_TRIALS
 
@@ -91,10 +92,9 @@ def main():
     # imputacion X_train
     X_train_imp = imputacion(X_train)
     # submuestreo
+    X_train_imp,y_train = submuestreo(X_train_imp,y_train, n_completo)
+    
     X_train_sample_imp ,y_train_sample = submuestreo(X_train_imp,y_train, n_subsample)
-
-    # A ELIMINAR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    # X_train_imp,y_train = submuestreo(X_train_imp,y_train, 1000)
     
 
     ## 3. Optimizacion Hiperparametros y entrenamiento rf - Guardo las cosas en sus funciones respectivas, pero creo que tendria que hacerlo aca
