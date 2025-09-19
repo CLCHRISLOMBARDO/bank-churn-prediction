@@ -16,7 +16,7 @@ import json
 import logging
 from optuna.samplers import TPESampler # Para eliminar el componente estocastico de optuna
 
-from src.config import PATH_OUTPUT_OPTIMIZACION, GANANCIA,ESTIMULO,SEMILLA
+from src.config import PATH_OUTPUT_OPTIMIZACION, GANANCIA,ESTIMULO,SEMILLA ,N_ESTIMATORS
 
 output_path = PATH_OUTPUT_OPTIMIZACION
 db_path = output_path + 'db/'
@@ -39,7 +39,7 @@ def optim_hiperp_binaria(X:pd.DataFrame|np.ndarray ,y:pd.Series|np.ndarray , n_t
         max_features = trial.suggest_float('max_features', 0.05, 0.7)
 
         model = RandomForestClassifier(
-            n_estimators=1000,
+            n_estimators=N_ESTIMATORS,
             max_depth=max_depth,
             min_samples_split=min_samples_split,
             min_samples_leaf=min_samples_leaf,
@@ -105,7 +105,7 @@ def optim_hiperp_ternaria(X:pd.DataFrame|np.ndarray ,y:pd.Series|np.ndarray , n_
         max_features = trial.suggest_float('max_features', 0.05, 0.7)
 
         model = RandomForestClassifier(
-            n_estimators=1000,
+            n_estimators=N_ESTIMATORS,
             max_depth=max_depth,
             min_samples_split=min_samples_split,
             min_samples_leaf=min_samples_leaf,
