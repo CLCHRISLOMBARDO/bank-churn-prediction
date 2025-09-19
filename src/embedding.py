@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from umap import UMAP
 import logging
-
+from src.config import SEMILLA
 
 
 logger=logging.getLogger(__name__)
@@ -16,7 +16,7 @@ def embedding_umap(md:np.ndarray, n_componentes:int=2,n_neighbors:int=20,min_dis
     min_dist=min_dist,
     learning_rate=learning_rate,
     metric=metric,
-    random_state=42,
+    random_state=SEMILLA,
     ).fit_transform(md)
     logger.info("Fin del embedding con UMAP")
     return embedding_rf

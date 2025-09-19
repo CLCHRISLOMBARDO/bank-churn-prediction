@@ -1,6 +1,6 @@
 #config.py
 ## Configuracion General
-SEMILLA= 4500
+SEMILLA= 42
 
 ## INPUT FILES
 PATH_INPUT_DATA="data/competencia_01.csv"

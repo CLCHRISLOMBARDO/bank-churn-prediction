@@ -3,7 +3,7 @@ from sklearn.cluster import KMeans
 import numpy as np
 import matplotlib.pyplot as plt
 import logging
-from src.config import PATH_OUTPUT_CLUSTER
+from src.config import PATH_OUTPUT_CLUSTER, SEMILLA
 
 logger=logging.getLogger(__name__)
 path_output_cluster=PATH_OUTPUT_CLUSTER
@@ -11,7 +11,7 @@ path_output_cluster=PATH_OUTPUT_CLUSTER
 def clustering_kmeans(n_clusters:int , embedding:np.ndarray ,name:str):
     name=f"clusters_{n_clusters}"+name
     logger.info(f"Inicio del clustering {name}")
-    kmeans = KMeans(n_clusters=n_clusters, random_state=17, n_init=10)
+    kmeans = KMeans(n_clusters=n_clusters, random_state=SEMILLA, n_init=10)
     clusters = kmeans.fit_predict(embedding)
 
     plt.scatter(embedding[:, 0], embedding[:, 1], c=clusters, cmap='viridis')

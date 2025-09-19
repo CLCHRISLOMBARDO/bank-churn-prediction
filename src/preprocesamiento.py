@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from sklearn.impute import SimpleImputer
 from typing import Tuple
+from src.config import SEMILLA
 
 import logging
 
@@ -34,7 +35,7 @@ def imputacion(X: pd.DataFrame|np.ndarray , strategy:str="median") -> pd.DataFra
 
 def submuestreo(X_train:pd.DataFrame|np.ndarray , y_train:pd.DataFrame|np.ndarray , n_sample_continua:int) ->Tuple[pd.DataFrame|np.ndarray ,  pd.Series|np.ndarray]:
     logger.info("Comienzo de Submuestreo continua")
-    np.random.seed(17)
+    np.random.seed(SEMILLA)
     continua_sample = y_train[y_train ==0].sample(n_sample_continua).index
     bajas_1_2 = y_train[y_train ==1].index
     rf_index = continua_sample.union(bajas_1_2)

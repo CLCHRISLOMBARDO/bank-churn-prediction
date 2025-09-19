@@ -45,7 +45,7 @@ def optim_hiperp_binaria(X:pd.DataFrame|np.ndarray ,y:pd.Series|np.ndarray , n_t
             min_samples_leaf=min_samples_leaf,
             max_features=max_features,
             max_samples=0.7,
-            random_state=42,
+            random_state=SEMILLA,
             n_jobs=12,
             oob_score=True
         )
@@ -111,7 +111,7 @@ def optim_hiperp_ternaria(X:pd.DataFrame|np.ndarray ,y:pd.Series|np.ndarray , n_
             min_samples_leaf=min_samples_leaf,
             max_features=max_features,
             max_samples=0.7,
-            random_state=42,
+            random_state=SEMILLA,
             n_jobs=12,
             oob_score=True
         )
@@ -128,6 +128,7 @@ def optim_hiperp_ternaria(X:pd.DataFrame|np.ndarray ,y:pd.Series|np.ndarray , n_
         study_name=study_name,
         storage=storage_name,
         load_if_exists=True,
+        sampler=TPESampler(seed=SEMILLA)
     )
 
     study.optimize(objective, n_trials=n_trials)

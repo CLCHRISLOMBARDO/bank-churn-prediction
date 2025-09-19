@@ -10,7 +10,7 @@ import datetime
 import pickle
 import json
 
-from src.config import PATH_OUTPUT_RF ,N_ESTIMATORS
+from src.config import PATH_OUTPUT_RF ,N_ESTIMATORS, SEMILLA
 
 output_path = PATH_OUTPUT_RF
 n_estimators = N_ESTIMATORS
@@ -29,7 +29,7 @@ def entrenamiento_rf(X:pd.DataFrame|np.ndarray ,y:pd.Series|np.ndarray , best_pa
         #**study.best_params,
         **best_parameters,
         max_samples=0.7,
-        random_state=42,
+        random_state=SEMILLA,
         n_jobs=12,
         oob_score=True )
     model_rf.fit(X,y)
