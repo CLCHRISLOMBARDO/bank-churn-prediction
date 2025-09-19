@@ -14,8 +14,9 @@ import datetime
 import pickle
 import json
 import logging
+from optuna.samplers import TPESampler # Para eliminar el componente estocastico de optuna
 
-from src.config import PATH_OUTPUT_OPTIMIZACION, GANANCIA,ESTIMULO
+from src.config import PATH_OUTPUT_OPTIMIZACION, GANANCIA,ESTIMULO,SEMILLA
 
 output_path = PATH_OUTPUT_OPTIMIZACION
 db_path = output_path + 'db/'
@@ -64,6 +65,7 @@ def optim_hiperp_binaria(X:pd.DataFrame|np.ndarray ,y:pd.Series|np.ndarray , n_t
         study_name=study_name,
         storage=storage_name,
         load_if_exists=True,
+        sampler=TPESampler(seed=SEMILLA)
     )
 
     study.optimize(objective, n_trials=n_trials)
