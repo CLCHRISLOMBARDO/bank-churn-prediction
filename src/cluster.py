@@ -10,7 +10,7 @@ from sklearn.ensemble import RandomForestClassifier
 logger=logging.getLogger(__name__)
 path_output_cluster=PATH_OUTPUT_CLUSTER
 
-def clustering_kmeans(n_clusters:int , y_train:np.ndarray , embedding:np.ndarray ,name:str)->pd.DataFrame:
+def clustering_kmeans(n_clusters:int , y_train:pd.Series, embedding:np.ndarray ,name:str)->pd.DataFrame:
     name=f"clusters_{n_clusters}"+name
     logger.info(f"Inicio del clustering {name}")
     kmeans = KMeans(n_clusters=n_clusters, random_state=SEMILLA, n_init=10)

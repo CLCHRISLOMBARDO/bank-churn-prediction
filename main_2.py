@@ -17,7 +17,7 @@ from src.optimizacion_rf import optim_hiperp_binaria
 from src.random_forests import  entrenamiento_rf,distanceMatrix
 from src.embedding import embedding_umap
 from src.cluster import clustering_kmeans ,cluster_distribution,score_cluster
-print("ya cargo todo")
+
 ## ---------------------------------------------------------Configuraciones Iniciales -------------------------------
 ## PATH
 path_input_data = PATH_INPUT_DATA
@@ -55,7 +55,7 @@ logger = logging.getLogger(__name__)
 ## --------------------------------------------------------Funcion main ------------------------------------------
 
 def main():
-    logger.info("Inicio de ejecucion.")
+    logger.info("Inicio de ejecucion main_2.")
 
     ## 0. load datos
     df=cargar_datos(path_input_data)
@@ -98,36 +98,20 @@ def main():
 
 
     ## 3. Optimizacion Hiperparametros y entrenamiento rf - Guardo las cosas en sus funciones respectivas, pero creo que tendria que hacerlo aca
-    # a- Modelo sampleado
-    name_rf_sample=f"_sampleado_{fecha}"
-    study_rf_sample = optim_hiperp_binaria(X_train_sample_imp , y_train_sample ,n_trials , name=name_rf_sample)
-    best_params_sample=study_rf_sample.best_params
-    model_rf_sample=entrenamiento_rf(X_train_sample_imp , y_train_sample ,best_params_sample,name=name_rf_sample)
-    class_index = np.where(model_rf_sample.classes_ == 1)[0][0]
-    proba_baja_sample=model_rf_sample.predict_proba(X_train_sample_imp)[:,class_index]
-    distancia_sample = distanceMatrix(model_rf_sample,X_train_sample_imp)
     
     # b- Modelo completo
     name_rf_completo=f"_completo_{fecha}"
-    study_rf_completo = optim_hiperp_binaria(X_train_imp , y_train , n_trials , name=name_rf_completo) 
-    best_params_completo=study_rf_completo.best_params
+    with open(bestparms_path+"best_params_auc_binaria_completo_2025-09-20_10-14-27.json", "r") as f:
+        best_params_completo = json.load(f)
     model_rf_completo=entrenamiento_rf(X_train_imp , y_train ,best_params_completo,name=name_rf_completo)
     class_index=np.where(model_rf_completo.classes_==1)[0][0]
     proba_baja_completo=model_rf_completo.predict_proba(X_train_sample_imp)[:,class_index] #Predigo solo el subsampleo que es el que voy a graficar
     distancia_con_completo_sampleado=distanceMatrix(model_rf_completo,X_train_sample_imp) # Calculo la dist solo con el subsampleo
 
     # 4. Embedding - UMAP
-    embedding_sample=embedding_umap(distancia_sample)
     embedding_comple = embedding_umap(distancia_con_completo_sampleado)
 
     # 5. Grafico del embedding coloreado por los predicts
-    #a- Sampleado
-    plt.scatter(embedding_sample[:,0], embedding_sample[:,1], c=proba_baja_sample)
-    plt.colorbar()
-    file_image=f"embedding_umap{name_rf_sample}.png"
-    plt.savefig(path_output_umap+file_image, dpi=300, bbox_inches="tight")
-    plt.close()
-
     #b-completo
     plt.scatter(embedding_comple[:,0], embedding_comple[:,1], c=proba_baja_completo)
     plt.colorbar()
@@ -136,12 +120,12 @@ def main():
     plt.close()
 
     # 7. Clusters
-    clusters=[4,5,6,7]
-    embeddings = [embedding_sample,embedding_comple]
-    names_file = [name_rf_sample , name_rf_completo]
-    names=["model_1_sample","model_2_completo"]
+    clusters=[5]
+    embeddings = [embedding_comple]
+    names_file = [name_rf_completo]
+    names=["model_2_completo"]
 
-    proba_bajas=[proba_baja_sample ,proba_baja_completo ]
+    proba_bajas=[proba_baja_completo ]
 
     
     results_clusters_score = {}
@@ -155,11 +139,7 @@ def main():
             cluster_i.to_csv(path_output_segmentacion+name+"_"+f"cluster_{k}_{fecha}.csv")
             class_distribution_by_cluster.to_csv(path_output_segmentacion+name+"_"+f"cluster_distribution_{k}_{fecha}.csv")
             results_clusters_score[name][k] = vandonngen_score
-            # results_clusters_by_model[name]["cluster_i"]=cluster_i
-            # results_clusters_by_model[name]["cross_table"]=class_distribution_by_cluster
-            # results_clusters_by_model[name]["score"]=vandonngen_score
-            # results_clusters_by_model[name]["important_features_by_cluster"]={}
-            # np.savetxt("array.csv", cluster_i, delimiter=",", fmt="%.4f")
+         
     try:
         file_name = f"score_cluster_by_model_{fecha}.json"
         with open(PATH_OUTPUT_SEGMENTACION+file_name, "w", encoding="utf-8") as f:
