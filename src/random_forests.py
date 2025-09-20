@@ -20,8 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 def entrenamiento_rf(X:pd.DataFrame|np.ndarray ,y:pd.Series|np.ndarray , best_parameters:dict[str, object], name:str)->RandomForestClassifier:
-    fecha = datetime.datetime.now().strftime("%Y-%m-%d %H_%M_%S")
-    name=f"rf_model_{name}_{fecha}"
+    name=f"rf_model_{name}"
     logger.info(f"Comienzo del entrenamiento del rf : {name}")
     
     model_rf = RandomForestClassifier(

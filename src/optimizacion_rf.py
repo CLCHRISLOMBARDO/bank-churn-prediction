@@ -51,9 +51,11 @@ def optim_hiperp_binaria(X:pd.DataFrame|np.ndarray ,y:pd.Series|np.ndarray , n_t
         )
 
         model.fit(X, y)
-        proba_oob = model.oob_decision_function_
 
-        auc_score = roc_auc_score(y, proba_oob[:, 1])
+        proba_oob = model.oob_decision_function_
+        pos_idx = int(np.where(model.classes_ == 1)[0][0])
+        auc_score = roc_auc_score(y, proba_oob[:, pos_idx])
+
 
         return auc_score
     

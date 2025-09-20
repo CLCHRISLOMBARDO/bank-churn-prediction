@@ -1,3 +1,4 @@
+#main.py
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -62,19 +63,16 @@ def main():
 
     ## 1. Contruccion de las columnas
     columnas=contruccion_cols(df)
-    cat_cols=columnas[0]
-    num_cols=columnas[1]
-    cols_lag_delta=columnas[2]
-    lista_regl_max_min = columnas[3]
-    cols_ratios=columnas[4]
+    cols_lag_delta_max_min_regl=columnas[0]
+    cols_ratios=columnas[1]
 
 
     ## 2. Feature Engineering
-    df=feature_engineering_lag(df,cols_lag_delta,2)
-    df=feature_engineering_delta(df,cols_lag_delta,2)
-    df=feature_engineering_max_min(df,lista_regl_max_min)
+    df=feature_engineering_lag(df,cols_lag_delta_max_min_regl,2)
+    df=feature_engineering_delta(df,cols_lag_delta_max_min_regl,2)
+    df=feature_engineering_max_min(df,cols_lag_delta_max_min_regl)
     df=feature_engineering_ratio(df,cols_ratios)
-    df=feature_engineering_linreg(df,lista_regl_max_min)
+    df=feature_engineering_linreg(df,cols_lag_delta_max_min_regl)
 
             # Guardo df
     # try:
@@ -103,7 +101,7 @@ def main():
     study_rf_sample = optim_hiperp_binaria(X_train_sample_imp , y_train_sample ,n_trials , name=name_rf_sample)
     best_params_sample=study_rf_sample.best_params
     model_rf_sample=entrenamiento_rf(X_train_sample_imp , y_train_sample ,best_params_sample,name=name_rf_sample)
-    class_index = np.where(model_rf_sample.classes_ == 1)[0]
+    class_index = np.where(model_rf_sample.classes_ == 1)[0][0]
     proba_baja_sample=model_rf_sample.predict_proba(X_train_sample_imp)[:,class_index]
     distancia_sample = distanceMatrix(model_rf_sample,X_train_sample_imp)
     
@@ -112,7 +110,7 @@ def main():
     study_rf_completo = optim_hiperp_binaria(X_train_imp , y_train , n_trials , name=name_rf_completo) 
     best_params_completo=study_rf_completo.best_params
     model_rf_completo=entrenamiento_rf(X_train_imp , y_train ,best_params_completo,name=name_rf_completo)
-    class_index=np.where(model_rf_completo.classes_==1)[0]
+    class_index=np.where(model_rf_completo.classes_==1)[0][0]
     proba_baja_completo=model_rf_completo.predict_proba(X_train_sample_imp)[:,class_index] #Predigo solo el subsampleo que es el que voy a graficar
     distancia_con_completo_sampleado=distanceMatrix(model_rf_completo,X_train_sample_imp) # Calculo la dist solo con el subsampleo
 
@@ -152,8 +150,8 @@ def main():
             class_distribution_by_cluster = cluster_distribution(cluster_i  ,proba_baja )
             vandonngen_score=score_cluster(class_distribution_by_cluster)
 
-            cluster_i.to_csv(path_output_segmentacion+name+"_"+f"cluster_{k}.csv")
-            class_distribution_by_cluster.to_csv(path_output_segmentacion+name+"_"+f"cluster_distribution_{k}.csv")
+            cluster_i.to_csv(path_output_segmentacion+name+"_"+f"cluster_{k}_{fecha}.csv")
+            class_distribution_by_cluster.to_csv(path_output_segmentacion+name+"_"+f"cluster_distribution_{k}_{fecha}.csv")
             results_clusters_score[name][k] = vandonngen_score
             # results_clusters_by_model[name]["cluster_i"]=cluster_i
             # results_clusters_by_model[name]["cross_table"]=class_distribution_by_cluster
