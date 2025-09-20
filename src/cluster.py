@@ -40,7 +40,7 @@ def clustering_kmeans(n_clusters:int , y_train:np.ndarray , embedding:np.ndarray
     return cluster_class_df
 
     
-def cluster_distribution(cluster_class_df:pd.DataFrame  ,prob_baja=np.ndarray )->pd.DataFrame:
+def cluster_distribution(cluster_class_df:pd.DataFrame  ,prob_baja:np.ndarray )->pd.DataFrame:
     logger.info(f"Comienzo del calculo de la distribucion de bajas y continua en los clusters")
     
     class_distribution_by_cluster = cluster_class_df.groupby('cluster')['original_class'].value_counts().unstack(fill_value=0)
